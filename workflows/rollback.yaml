@@ -1,0 +1,56 @@
+name: rollback
+description: Explicit rollback workflow — compensates all completed steps in reverse order for a failed workflow execution.
+
+steps:
+  - id: rollback_dns
+    name: Rollback DNS Entry
+    executor: dns_delete
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s
+
+  - id: rollback_deployment
+    name: Rollback Deployment
+    executor: deployment_delete
+    depends_on: [rollback_dns]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 5s
+
+  - id: rollback_messaging
+    name: Rollback RabbitMQ
+    executor: rabbitmq_delete
+    depends_on: [rollback_deployment]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s
+
+  - id: rollback_cache
+    name: Rollback Redis
+    executor: redis_delete
+    depends_on: [rollback_deployment]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s
+
+  - id: rollback_database
+    name: Rollback PostgreSQL
+    executor: postgresql_delete
+    depends_on: [rollback_deployment]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s
+
+  - id: rollback_namespace
+    name: Rollback Namespace
+    executor: namespace_delete
+    depends_on: [rollback_messaging, rollback_cache, rollback_database]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s

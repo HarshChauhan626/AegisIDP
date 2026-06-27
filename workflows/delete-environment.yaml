@@ -1,0 +1,66 @@
+name: delete-environment
+description: Tears down an application environment by removing all provisioned resources in reverse order.
+
+steps:
+  - id: validate
+    name: Validate Environment
+    executor: validate
+    retry:
+      max_attempts: 1
+      strategy: fixed
+      base_delay: 0s
+
+  - id: deregister_dns
+    name: Deregister DNS Entry
+    executor: dns_delete
+    depends_on: [validate]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s
+
+  - id: undeploy_application
+    name: Undeploy Application
+    executor: deployment_delete
+    depends_on: [deregister_dns]
+    retry:
+      max_attempts: 3
+      strategy: exponential_backoff
+      base_delay: 5s
+      max_delay: 60s
+
+  - id: delete_messaging
+    name: Delete RabbitMQ
+    executor: rabbitmq_delete
+    depends_on: [undeploy_application]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s
+
+  - id: delete_cache
+    name: Delete Redis
+    executor: redis_delete
+    depends_on: [undeploy_application]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s
+
+  - id: delete_database
+    name: Delete PostgreSQL
+    executor: postgresql_delete
+    depends_on: [undeploy_application]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s
+
+  - id: delete_namespace
+    name: Delete Namespace
+    executor: namespace_delete
+    depends_on: [delete_messaging, delete_cache, delete_database]
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s

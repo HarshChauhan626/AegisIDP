@@ -1,0 +1,94 @@
+name: create-environment
+description: Provisions a full application environment including namespace, databases, cache, messaging, and deployment.
+
+steps:
+  - id: validate
+    name: Validate Configuration
+    executor: validate
+    retry:
+      max_attempts: 1
+      strategy: fixed
+      base_delay: 0s
+
+  - id: reserve_resources
+    name: Reserve Resources
+    executor: reserve
+    depends_on: [validate]
+    retry:
+      max_attempts: 2
+      strategy: fixed
+      base_delay: 1s
+
+  - id: create_namespace
+    name: Create Namespace
+    executor: namespace
+    depends_on: [reserve_resources]
+    rollback: true
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 1s
+
+  - id: provision_database
+    name: Provision PostgreSQL
+    executor: postgresql
+    depends_on: [create_namespace]
+    rollback: true
+    retry:
+      max_attempts: 5
+      strategy: exponential_backoff
+      base_delay: 2s
+      max_delay: 30s
+
+  - id: provision_cache
+    name: Provision Redis
+    executor: redis
+    depends_on: [create_namespace]
+    rollback: true
+    retry:
+      max_attempts: 5
+      strategy: exponential_backoff
+      base_delay: 2s
+      max_delay: 30s
+
+  - id: provision_messaging
+    name: Provision RabbitMQ
+    executor: rabbitmq
+    depends_on: [create_namespace]
+    rollback: true
+    retry:
+      max_attempts: 5
+      strategy: exponential_backoff
+      base_delay: 2s
+      max_delay: 30s
+
+  - id: deploy_application
+    name: Deploy Application
+    executor: deployment
+    depends_on: [provision_database, provision_cache, provision_messaging]
+    rollback: true
+    retry:
+      max_attempts: 3
+      strategy: exponential_backoff
+      base_delay: 5s
+      max_delay: 60s
+
+  - id: register_dns
+    name: Register DNS Entry
+    executor: dns
+    depends_on: [deploy_application]
+    rollback: true
+    retry:
+      max_attempts: 3
+      strategy: fixed
+      base_delay: 2s
+
+  - id: health_check
+    name: Health Check
+    executor: healthcheck
+    depends_on: [register_dns]
+    retry:
+      max_attempts: 5
+      strategy: exponential_backoff
+      base_delay: 3s
+      max_delay: 30s
