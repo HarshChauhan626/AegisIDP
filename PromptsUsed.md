@@ -81,3 +81,17 @@ Below is a curated sequence of high-quality, comprehensive prompts that I have u
 > Please write a robust `Makefile` with targets for `dev`, `test`, `build`, and `migrate`. Add a standard API error handling envelope for consistent frontend consumption, and ensure pagination is applied to all list endpoints. 
 > 
 > Additionally, create a comprehensive `RunningGuide.md` that provides clear, step-by-step instructions for a new developer to set up, build, and run the AegisIDP project locally."
+
+## 11. Phase 8 — Post-Launch Iterations & Issue Fixes
+> **Prompt (Local Testing & Troubleshooting):**
+> "Run this project on local, I want to test it. We encountered an issue where `make dev` failed because `make` was not recognized on Windows. Please check my local environment dependencies (Go, Node, npm) and run the backend and frontend servers using direct commands or `docker compose` to establish a local testing environment."
+
+> **Prompt (UI Wiring & New Features):**
+> "I'm testing the UI and a few things are missing: when I click 'New Environment', nothing happens, and the 'Provisioning' state cards don't click through to logs. 
+> 
+> Please implement the 'New Environment' modal, ensure clicking an environment card navigates to an environment details page with its workflow execution history, and implement the Monaco Editor for the Workflow Templates page. I should be able to check logs for the provisionings!"
+
+> **Prompt (UX Improvements & Payload Configuration):**
+> "Commit the above frontend changes with a proper message, and look into the following issues:
+> 1. The 'Cancel' and 'Retry' buttons on the workflow details page should be wired up to the API and actually work.
+> 2. While provisioning a new environment, I should be asked for the 'capacity' (e.g., Small, Medium, Large). Please add a dropdown to the modal, pass this configuration in the API payload, and ensure the Go backend extracts and stores it."
