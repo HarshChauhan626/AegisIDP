@@ -1,7 +1,9 @@
 "use client";
 
 import { use } from "react";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { useWorkflow } from "@/hooks/useWorkflows";
+import { apiFetch } from "@/services/api";
 import type { WorkflowStep } from "@/types";
 import {
   CheckCircle2,
@@ -40,6 +42,21 @@ export default function WorkflowDetailPage({
 }) {
   const { id } = use(params);
   const { data: workflow, isLoading, error } = useWorkflow(id);
+  const queryClient = useQueryClient();
+
+  const retryMutation = useMutation({
+    mutationFn: () => apiFetch(`/api/workflows/${id}/retry`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workflow", id] });
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: () => apiFetch(`/api/workflows/${id}/cancel`, { method: "POST" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workflow", id] });
+    },
+  });
 
   if (isLoading) {
     return (
@@ -83,18 +100,22 @@ export default function WorkflowDetailPage({
             {(workflow.state === "failed" || workflow.state === "rolled_back") && (
               <button
                 id="retry-workflow-btn"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 text-sm rounded-lg transition-colors border border-amber-600/30"
+                onClick={() => retryMutation.mutate()}
+                disabled={retryMutation.isPending}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/30 text-amber-400 text-sm rounded-lg transition-colors border border-amber-600/30 disabled:opacity-50"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                {retryMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RotateCcw className="w-3.5 h-3.5" />}
                 Retry
               </button>
             )}
             {(workflow.state === "running" || workflow.state === "queued") && (
               <button
                 id="cancel-workflow-btn"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm rounded-lg transition-colors border border-red-600/30"
+                onClick={() => cancelMutation.mutate()}
+                disabled={cancelMutation.isPending}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 text-sm rounded-lg transition-colors border border-red-600/30 disabled:opacity-50"
               >
-                <Ban className="w-3.5 h-3.5" />
+                {cancelMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Ban className="w-3.5 h-3.5" />}
                 Cancel
               </button>
             )}

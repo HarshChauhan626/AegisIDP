@@ -31,6 +31,7 @@ export default function EnvironmentsPage() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [envName, setEnvName] = useState("");
+  const [capacity, setCapacity] = useState("small");
 
   const { data: environments = [], isLoading } = useQuery<Environment[]>({
     queryKey: ["environments"],
@@ -41,7 +42,7 @@ export default function EnvironmentsPage() {
     mutationFn: (name: string) =>
       apiFetch<{ environment: Environment; workflow_id: string }>("/api/environments", {
         method: "POST",
-        body: JSON.stringify({ name, project_id: "default-project" }),
+        body: JSON.stringify({ name, project_id: "default-project", config: { capacity } }),
       }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["environments"] });
@@ -156,6 +157,20 @@ export default function EnvironmentsPage() {
                   required
                   minLength={2}
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Capacity
+                </label>
+                <select
+                  value={capacity}
+                  onChange={(e) => setCapacity(e.target.value)}
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-violet-500 transition-colors"
+                >
+                  <option value="small">Small (Dev)</option>
+                  <option value="medium">Medium (Staging)</option>
+                  <option value="large">Large (Production)</option>
+                </select>
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -37,11 +38,19 @@ func (h *EnvironmentHandler) Create(c *gin.Context) {
 		return
 	}
 
+	configStr := "{}"
+	if req.Config != nil {
+		if b, err := json.Marshal(req.Config); err == nil {
+			configStr = string(b)
+		}
+	}
+
 	env := &models.Environment{
 		ID:        uuid.NewString(),
 		ProjectID: req.ProjectID,
 		Name:      req.Name,
 		Status:    models.EnvironmentStatusPending,
+		Config:    configStr,
 		CreatedBy: middleware.GetUserID(c),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -61,6 +70,7 @@ func (h *EnvironmentHandler) Create(c *gin.Context) {
 			"environment_name": env.Name,
 			"project_id":       env.ProjectID,
 			"environment_id":   env.ID,
+			"config":           req.Config,
 		},
 	})
 	if err != nil {
