@@ -13,7 +13,7 @@ services:
       WORKER_COUNT: ${WORKER_COUNT:-5}
       QUEUE_CAPACITY: ${QUEUE_CAPACITY:-100}
       LOG_LEVEL: ${LOG_LEVEL:-debug}
-      FRONTEND_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:3001
     volumes:
       - ./data:/data
     healthcheck:

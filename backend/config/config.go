@@ -14,6 +14,7 @@ type Config struct {
 	LogLevel      string
 	FrontendURL   string
 	Port          string
+	WorkflowDir   string
 }
 
 // Load reads config from environment variables with sensible defaults.
@@ -26,6 +27,7 @@ func Load() *Config {
 		LogLevel:      getEnv("LOG_LEVEL", "debug"),
 		FrontendURL:   getEnv("FRONTEND_URL", "http://localhost:3000"),
 		Port:          getEnv("PORT", "8080"),
+		WorkflowDir:   getEnv("WORKFLOW_DIR", "../workflows"),
 	}
 }
 

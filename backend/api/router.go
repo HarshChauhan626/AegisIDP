@@ -6,6 +6,7 @@ import (
 	"github.com/HarshChauhan626/AegisIDP/backend/api/handlers"
 	"github.com/HarshChauhan626/AegisIDP/backend/middleware"
 	"github.com/HarshChauhan626/AegisIDP/backend/repository"
+	"github.com/HarshChauhan626/AegisIDP/backend/workers"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +18,7 @@ type RouterDeps struct {
 	WorkflowRepo repository.WorkflowRepository
 	EventRepo    repository.EventRepository
 	AuditRepo    repository.AuditLogRepository
+	Dispatcher   *workers.Dispatcher
 	JWTSecret    string
 	FrontendURL  string
 }
@@ -29,7 +31,7 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 
 	// CORS — allow frontend origin
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{deps.FrontendURL, "http://localhost:3000"},
+		AllowOrigins:     []string{deps.FrontendURL, "http://localhost:3000", "http://localhost:3001"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
@@ -38,8 +40,8 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 
 	// Instantiate handlers
 	authH := handlers.NewAuthHandler(deps.UserRepo, deps.JWTSecret)
-	envH := handlers.NewEnvironmentHandler(deps.EnvRepo)
-	wfH := handlers.NewWorkflowHandler(deps.WorkflowRepo)
+	envH := handlers.NewEnvironmentHandler(deps.EnvRepo, deps.Dispatcher)
+	wfH := handlers.NewWorkflowHandler(deps.WorkflowRepo, deps.Dispatcher)
 	userH := handlers.NewUserHandler(deps.UserRepo)
 	obsH := handlers.NewObservabilityHandler(deps.EventRepo, deps.AuditRepo)
 

@@ -21,10 +21,11 @@ type WorkflowStep struct {
 	WorkflowID  string     `gorm:"not null;index" json:"workflow_id"`
 	Name        string     `gorm:"not null" json:"name"`
 	ExecutorKey string     `gorm:"not null" json:"executor_key"`
+	StepOrder   int        `gorm:"not null;default:0" json:"step_order"`
 	State       StepState  `gorm:"not null;default:'pending'" json:"state"`
 	Attempt     int        `gorm:"not null;default:0" json:"attempt"`
-	Input       string     `gorm:"type:json" json:"input,omitempty"`   // JSON
-	Output      string     `gorm:"type:json" json:"output,omitempty"`  // JSON
+	Input       string     `gorm:"type:json" json:"input,omitempty"`  // JSON
+	Output      string     `gorm:"type:json" json:"output,omitempty"` // JSON
 	Error       string     `json:"error,omitempty"`
 	StartedAt   *time.Time `json:"started_at,omitempty"`
 	CompletedAt *time.Time `json:"completed_at,omitempty"`
