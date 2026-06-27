@@ -18,7 +18,7 @@ Platform Orchestrator is a local-first Internal Developer Platform (IDP) that si
 
 ## Phases
 
-### Phase 1 — Foundation (Week 1–2)
+### Phase 1 — Foundation (Week 1–2) [✅ Implemented]
 
 **Backend**
 
@@ -45,7 +45,7 @@ Platform Orchestrator is a local-first Internal Developer Platform (IDP) that si
 
 ---
 
-### Phase 2 — Workflow Engine Core (Week 3–4)
+### Phase 2 — Workflow Engine Core (Week 3–4) [✅ Implemented]
 
 **Workflow Engine**
 
@@ -70,7 +70,7 @@ Platform Orchestrator is a local-first Internal Developer Platform (IDP) that si
 
 ---
 
-### Phase 3 — Provisioning Executors (Week 5)
+### Phase 3 — Provisioning Executors (Week 5) [✅ Implemented]
 
 **Mock Resource Executors**
 
@@ -106,7 +106,7 @@ Each executor simulates real infrastructure behaviour (random latency, configura
 
 ---
 
-### Phase 4 — Event System + Observability (Week 6)
+### Phase 4 — Event System + Observability (Week 6) [✅ Implemented]
 
 **Event Bus**
 
@@ -134,7 +134,7 @@ Each executor simulates real infrastructure behaviour (random latency, configura
 
 ---
 
-### Phase 5 — Real-Time UI (Week 7)
+### Phase 5 — Real-Time UI (Week 7) [✅ Implemented]
 
 **SSE Streaming**
 
@@ -167,7 +167,7 @@ Each executor simulates real infrastructure behaviour (random latency, configura
 
 ### Phase 6 — Additional Features (Week 8)
 
-#### Feature 1 — Role-Based Access Control (RBAC)
+#### Feature 1 — Role-Based Access Control (RBAC) [✅ Implemented]
 
 Granular permission enforcement beyond basic role assignment.
 
@@ -193,7 +193,7 @@ Granular permission enforcement beyond basic role assignment.
 
 ---
 
-#### Feature 2 — Workflow Templates + Monaco Editor
+#### Feature 2 — Workflow Templates + Monaco Editor [✅ Implemented]
 
 Allow teams to author and manage custom workflow definitions directly in the UI.
 
@@ -216,7 +216,7 @@ Allow teams to author and manage custom workflow definitions directly in the UI.
 
 ---
 
-#### Feature 3 — Scheduled Workflows (Cron-based)
+#### Feature 3 — Scheduled Workflows (Cron-based) [⏳ Pending]
 
 Automate recurring operations such as environment expiry cleanup, nightly health checks, and resource audits.
 
@@ -241,7 +241,7 @@ Automate recurring operations such as environment expiry cleanup, nightly health
 
 ---
 
-### Phase 7 — Hardening + Polish (Week 9)
+### Phase 7 — Hardening + Polish (Week 9) [⏳ Partially Implemented]
 
 - Integration tests: workflow execution end-to-end, retry and rollback paths
 - API error handling standardisation (consistent error response envelope)
