@@ -1,10 +1,12 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/services/api";
 import type { Environment } from "@/types";
-import { Plus, Server, Circle } from "lucide-react";
+import { Plus, Server, Circle, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const statusColors: Record<string, string> = {
   pending: "text-gray-400",
@@ -25,10 +27,38 @@ const statusBg: Record<string, string> = {
 };
 
 export default function EnvironmentsPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [envName, setEnvName] = useState("");
+
   const { data: environments = [], isLoading } = useQuery<Environment[]>({
     queryKey: ["environments"],
     queryFn: () => apiFetch<Environment[]>("/api/environments"),
   });
+
+  const createMutation = useMutation({
+    mutationFn: (name: string) =>
+      apiFetch<{ environment: Environment; workflow_id: string }>("/api/environments", {
+        method: "POST",
+        body: JSON.stringify({ name, project_id: "default-project" }),
+      }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["environments"] });
+      setIsModalOpen(false);
+      setEnvName("");
+      if (data.workflow_id) {
+        router.push(`/workflows/${data.workflow_id}`);
+      }
+    },
+  });
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (envName.trim().length >= 2) {
+      createMutation.mutate(envName.trim());
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -40,6 +70,7 @@ export default function EnvironmentsPage() {
         </div>
         <button
           id="create-environment-btn"
+          onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-sm font-medium rounded-lg transition-all shadow-lg shadow-violet-500/20"
         >
           <Plus className="w-4 h-4" />
@@ -69,6 +100,7 @@ export default function EnvironmentsPage() {
           {environments.map((env) => (
             <div
               key={env.id}
+              onClick={() => router.push(`/environments/${env.id}`)}
               className="bg-gray-900 border border-gray-800 rounded-xl p-5 hover:border-gray-700 transition-colors cursor-pointer"
             >
               <div className="flex items-start justify-between mb-3">
@@ -93,6 +125,59 @@ export default function EnvironmentsPage() {
               </p>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Create Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-semibold text-white">New Environment</h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-500 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Environment Name
+                </label>
+                <input
+                  type="text"
+                  value={envName}
+                  onChange={(e) => setEnvName(e.target.value)}
+                  placeholder="e.g. staging-env"
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-white placeholder:text-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
+                  autoFocus
+                  required
+                  minLength={2}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={createMutation.isPending || envName.trim().length < 2}
+                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  {createMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : null}
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
